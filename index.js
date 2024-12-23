@@ -37,14 +37,12 @@ async function run() {
 
 
 
+    // Restaurant related apis
+
     app.get('/foods',async(req,res)=>{
       const search = req.query.search
-      console.log(search)
-      // let query = {
-      //   title: {
-      //     $regex: 'search',
-      //     $options: 'i',
-      //   }}
+      
+      
 
       const query = search
       ? {
@@ -60,6 +58,9 @@ async function run() {
         res.send(result);
       })
 
+
+
+
       app.get('/foods/:id',async(req,res)=>{
         const id = req.params.id;
      
@@ -68,6 +69,34 @@ async function run() {
       res.send(result)
       })
 
+
+      app.get('/api/foods', async (req, res) => {
+      
+        const userEmail = req.query.email;
+        
+          const query = { email: userEmail };
+        const  result = await restaurantCollection.find(query).toArray();
+
+        res.send(result);
+        })
+
+
+        app.put('/foods/:id',async(req,res)=>{
+          const id = req.params.id;
+      
+          const filter = {_id:new ObjectId(id)}
+          const options = { upsert: true };
+          const updatedDoc = {
+              $set: req.body
+          }
+    
+          const result = await restaurantCollection.updateOne(filter,updatedDoc,options);
+          res.send(result)
+        })
+
+
+
+
     app.post('/foods',async(req,res)=>{
         const foodsItem = req.body;
         const result = await restaurantCollection.insertOne(foodsItem)
@@ -75,6 +104,24 @@ async function run() {
     })
 
 
+
+    // purchase related apis
+
+
+    app.get('/purchases',async(req,res)=>{
+      const result = await foodsPurchaseCollection.find().toArray();
+      
+      res.send(result);
+    })
+
+
+
+
+    app.post('/purchases',async(req,res)=>{
+      const purchaseItem = req.body;
+      const result = await foodsPurchaseCollection.insertOne(purchaseItem)
+      res.send(result)
+    })
 
 
 
