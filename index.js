@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 require('dotenv').config();
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const  port = process.env.PORT || 5000;
 
 // middleware
@@ -32,14 +32,40 @@ async function run() {
     await client.connect();
 
     const database = client.db("restaurantDB");
-    const restaurantCollection = database.collection("restaurant"); 
+    const restaurantCollection = database.collection("restaurant");
+    const foodsPurchaseCollection = database.collection('purchase')
 
 
 
     app.get('/foods',async(req,res)=>{
-        const cursor = restaurantCollection.find();
+      const search = req.query.search
+      console.log(search)
+      // let query = {
+      //   title: {
+      //     $regex: 'search',
+      //     $options: 'i',
+      //   }}
+
+      const query = search
+      ? {
+        itemName: {
+            $regex: new RegExp(search, 'i'), 
+          },
+        }
+      : {};
+
+
+        const cursor = restaurantCollection.find(query);
         const result = await cursor.toArray();
         res.send(result);
+      })
+
+      app.get('/foods/:id',async(req,res)=>{
+        const id = req.params.id;
+     
+      const query = {_id:new ObjectId(id)}
+      const result = await restaurantCollection.findOne(query);
+      res.send(result)
       })
 
     app.post('/foods',async(req,res)=>{
@@ -70,21 +96,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 app.get('/',async(req,res)=>{
