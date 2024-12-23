@@ -1,5 +1,8 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
+
 require('dotenv').config();
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -7,9 +10,35 @@ const  port = process.env.PORT || 5000;
 
 // middleware
 
-app.use(cors())
+app.use(cors(
+  {
+    origin:['http://localhost:5173'],
+    credentials: true,
+  }
+))
 
 app.use(express.json())
+
+app.use(cookieParser())
+
+
+const verifyToken = (req,res,next)=>{
+  console.log('inside verify token middleware')
+  const token = req?.cookies?.token
+  if(!token){
+    return res.status(401).send({message:'UnAuthorized Access'})
+  }
+
+  jwt.verify(token,process.env.JWT_SECRET,(error,decoded)=>{
+    if(error){
+      return res.status(401).send({message:'Un Authorized Access'})
+    }
+    req.user = decoded;
+    next()
+  })
+
+  
+}
 
 
 
@@ -34,6 +63,18 @@ async function run() {
     const database = client.db("restaurantDB");
     const restaurantCollection = database.collection("restaurant");
     const foodsPurchaseCollection = database.collection('purchase')
+
+     // Auth Related Apis
+
+     app.post('/jwt',async(req,res)=>{
+      const user = req.body;
+      
+      const token = jwt.sign(user,'secret',{expiresIn:'365d'});
+      res.send(token)
+     })
+
+
+
 
 
 
