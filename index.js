@@ -114,6 +114,24 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/api/purchases',async(req,res)=>{
+      const userEmail = req.query.email;
+        
+      const query = { email: userEmail };
+    const  result = await foodsPurchaseCollection.find(query).toArray();
+
+    res.send(result);
+    })
+
+
+    app.delete('/purchases/:id',async(req,res)=>{
+      const id = req.params.id;
+      console.log(id)
+    
+      const query = { _id: new ObjectId(id) }
+      const result = await foodsPurchaseCollection.deleteOne(query);
+      res.send(result);
+})
 
 
 
