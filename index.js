@@ -59,7 +59,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const database = client.db("restaurantDB");
     const restaurantCollection = database.collection("restaurant");
@@ -75,7 +75,9 @@ async function run() {
       res
         .cookie('token',token,{
           httpOnly:true,
-          secure:false,
+          // secure:false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 
 
 
@@ -88,7 +90,9 @@ async function run() {
       res
          .clearCookie('token',{
           httpOnly:true,
-          secure:false,
+          // secure:false,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
              })
 
           .send({success:true})   
@@ -134,6 +138,11 @@ async function run() {
       const result = await restaurantCollection.findOne(query);
       res.send(result)
       })
+
+      app.get('/api/foods/top', async (req, res) => {
+        const topFoods = await restaurantCollection.find().sort({ purchaseCount: -1 }).limit(6).toArray();
+        res.json(topFoods);
+      });
 
 
       app.get('/api/foods',verifyToken, async (req, res) => {
@@ -191,6 +200,7 @@ async function run() {
       const userEmail = req.query.email;
       // console.log(req.cookies)
      
+     
       if(req.user.email !== req.query.email){
         return res.status(403).send({message:'forbidden access'})
       }
@@ -206,7 +216,7 @@ async function run() {
 
     app.delete('/purchases/:id',async(req,res)=>{
       const id = req.params.id;
-      console.log(id)
+      // console.log(id)
     
       const query = { _id: new ObjectId(id) }
       const result = await foodsPurchaseCollection.deleteOne(query);
@@ -218,6 +228,31 @@ async function run() {
     app.post('/purchases',async(req,res)=>{
       const purchaseItem = req.body;
       const result = await foodsPurchaseCollection.insertOne(purchaseItem)
+
+      const id = purchaseItem.food_id;
+      // console.log(id)
+      const query = {_id : new ObjectId(id)}
+      const food = await restaurantCollection.findOne(query);
+      let newCount = 0;
+      if(food.purchaseCount){
+        newCount = food.purchaseCount + 1
+      }
+      else{
+        newCount = 1
+      }
+
+      const filter = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set:{
+          purchaseCount:newCount
+        }
+      }
+      const updateResult = await restaurantCollection.updateOne(filter,updateDoc)
+
+
+
+
+
       res.send(result)
     })
 
@@ -233,7 +268,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
