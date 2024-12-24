@@ -12,7 +12,7 @@ const  port = process.env.PORT || 5000;
 
 app.use(cors(
   {
-    origin:['http://localhost:5173'],
+    origin:['http://localhost:5173','https://restaurant-management-9fcba.web.app','https://restaurant-management-9fcba.firebaseapp.com'],
     credentials: true,
   }
 ))
