@@ -23,7 +23,7 @@ app.use(cookieParser())
 
 
 const verifyToken = (req,res,next)=>{
-  console.log('inside verify token middleware')
+  // console.log('inside verify token middleware')
   const token = req?.cookies?.token
   if(!token){
     return res.status(401).send({message:'UnAuthorized Access'})
@@ -34,6 +34,7 @@ const verifyToken = (req,res,next)=>{
       return res.status(401).send({message:'Un Authorized Access'})
     }
     req.user = decoded;
+    // console.log(req.user)
     next()
   })
 
@@ -62,15 +63,35 @@ async function run() {
 
     const database = client.db("restaurantDB");
     const restaurantCollection = database.collection("restaurant");
-    const foodsPurchaseCollection = database.collection('purchase')
+    const foodsPurchaseCollection = database.collection('purchase');
 
      // Auth Related Apis
 
      app.post('/jwt',async(req,res)=>{
       const user = req.body;
       
-      const token = jwt.sign(user,'secret',{expiresIn:'365d'});
-      res.send(token)
+      const token = jwt.sign(user,process.env.JWT_SECRET,{expiresIn:'365d'});
+      
+      res
+        .cookie('token',token,{
+          httpOnly:true,
+          secure:false,
+
+
+
+        })
+         .send({success:true})
+     })
+
+
+     app.post('/logout',(req,res)=>{
+      res
+         .clearCookie('token',{
+          httpOnly:true,
+          secure:false,
+             })
+
+          .send({success:true})   
      })
 
 
@@ -102,20 +123,31 @@ async function run() {
 
 
 
-      app.get('/foods/:id',async(req,res)=>{
+      app.get('/foods/:id',verifyToken,async(req,res)=>{
         const id = req.params.id;
-     
+        // if (!ObjectId.isValid(id)) {
+        //   return res.status(400).send({ message: 'Invalid food ID' });
+        // }
+        // console.log(req.cookies)
+       
       const query = {_id:new ObjectId(id)}
       const result = await restaurantCollection.findOne(query);
       res.send(result)
       })
 
 
-      app.get('/api/foods', async (req, res) => {
+      app.get('/api/foods',verifyToken, async (req, res) => {
       
         const userEmail = req.query.email;
         
+        // console.log(req.cookies)
+        if(req.user.email !== req.query.email){
+          return res.status(403).send({message:'forbidden access'})
+        }
+        
           const query = { email: userEmail };
+
+          
         const  result = await restaurantCollection.find(query).toArray();
 
         res.send(result);
@@ -124,7 +156,7 @@ async function run() {
 
         app.put('/foods/:id',async(req,res)=>{
           const id = req.params.id;
-      
+          
           const filter = {_id:new ObjectId(id)}
           const options = { upsert: true };
           const updatedDoc = {
@@ -149,16 +181,23 @@ async function run() {
     // purchase related apis
 
 
-    app.get('/purchases',async(req,res)=>{
+    app.get('/purchases',verifyToken,async(req,res)=>{
       const result = await foodsPurchaseCollection.find().toArray();
       
       res.send(result);
     })
 
-    app.get('/api/purchases',async(req,res)=>{
+    app.get('/api/purchases',verifyToken,async(req,res)=>{
       const userEmail = req.query.email;
-        
+      // console.log(req.cookies)
+     
+      if(req.user.email !== req.query.email){
+        return res.status(403).send({message:'forbidden access'})
+      }
+      
       const query = { email: userEmail };
+      
+      
     const  result = await foodsPurchaseCollection.find(query).toArray();
 
     res.send(result);
