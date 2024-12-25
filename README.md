@@ -31,7 +31,7 @@
 
 
 
-## I have used REACT TOOLTIP , React Awesome REVEAL .
+## I have used REACT TOOLTIP .
 
 ## GITHUB REPOSITORY LINK (CLIENT SIDE) : https://github.com/programming-hero-web-course2/b10a11-client-side-Md-SayeedAlam
 
