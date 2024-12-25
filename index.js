@@ -12,7 +12,7 @@ const  port = process.env.PORT || 5000;
 
 app.use(cors(
   {
-    origin:['http://localhost:5173','https://restaurant-management-9fcba.web.app','https://restaurant-management-9fcba.firebaseapp.com'],
+    origin:['http://localhost:5173','https://restaurant-management-9fcba.web.app','https://restaurant-management-9fcba.firebaseapp.com','https://restaurant-management-sayeed.surge.sh','https://restaurant-management-sayeed.netlify.app'],
     credentials: true,
   }
 ))
@@ -209,6 +209,7 @@ async function run() {
       
       
     const  result = await foodsPurchaseCollection.find(query).toArray();
+    
 
     res.send(result);
     })
