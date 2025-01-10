@@ -33,10 +33,10 @@
 
 ## I have used REACT TOOLTIP .
 
-## GITHUB REPOSITORY LINK (CLIENT SIDE) : https://github.com/programming-hero-web-course2/b10a11-client-side-Md-SayeedAlam
+## GITHUB REPOSITORY LINK (CLIENT SIDE) : https://github.com/Md-SayeedAlam/restaurant-management-client-repo-with-commit
 
 
-## GITHUB REPOSITORY LINK (SERVER SIDE) : https://github.com/programming-hero-web-course2/b10a11-server-side-Md-SayeedAlam
+## GITHUB REPOSITORY LINK (SERVER SIDE) : https://github.com/Md-SayeedAlam/restaurant-management-server-side-repo-with-commit
 
 
 
