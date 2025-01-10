@@ -140,7 +140,7 @@ async function run() {
       })
 
       app.get('/api/foods/top', async (req, res) => {
-        const topFoods = await restaurantCollection.find().sort({ purchaseCount: -1 }).limit(6).toArray();
+        const topFoods = await restaurantCollection.find().sort({ purchaseCount: -1 }).limit(8).toArray();
         res.json(topFoods);
       });
 
