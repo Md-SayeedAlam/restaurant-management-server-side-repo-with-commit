@@ -107,9 +107,9 @@ async function run() {
 
     app.get('/foods',async(req,res)=>{
       const search = req.query.search
-      
-      
-
+      const sort = req.query.sort
+      let options={}
+      if(sort) options={sort:{price: sort === 'asc' ? 1 : -1}}
       const query = search
       ? {
         itemName: {
@@ -119,7 +119,7 @@ async function run() {
       : {};
 
 
-        const cursor = restaurantCollection.find(query);
+        const cursor = restaurantCollection.find(query,options);
         const result = await cursor.toArray();
         res.send(result);
       })
